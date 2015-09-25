@@ -13,3 +13,6 @@ CONFIG +=c++11
 HEADERS += \
     tcpserver.h \
     clientsocket.h
+
+
+LIBS +=-lboost_system
