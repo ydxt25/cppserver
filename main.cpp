@@ -3,6 +3,13 @@
 #include "tcpserver.h"
 using namespace std;
 
+
+
+void work()
+{
+
+}
+
 int main()
 {
 

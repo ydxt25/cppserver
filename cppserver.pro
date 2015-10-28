@@ -5,14 +5,16 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     tcpserver.cpp \
-    clientsocket.cpp
+    clientsocket.cpp \
+    protocos.cpp
 
 
 CONFIG +=c++11
 
 HEADERS += \
     tcpserver.h \
-    clientsocket.h
+    clientsocket.h \
+    protocos.h
 
 
 LIBS +=-lboost_system
