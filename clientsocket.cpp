@@ -1,36 +1,45 @@
 #include "clientsocket.h"
 #include <iostream>
-ClientSocket::ClientSocket(boost::asio::io_service &ios_):
-    _ios(ios_),_sock(new boost::asio::ip::tcp::socket(ios_))
+#include "tcpserver.h"
+ClientSocket::ClientSocket(boost::asio::io_service &ios_,TcpServer *tcpserver):
+    _ios(ios_),_sock(new boost::asio::ip::tcp::socket(ios_)),_tcpserver(tcpserver)
 {
 }
 
-void ClientSocket::startRead()
-{
-    _sock->async_receive(boost::asio::buffer(message),boost::bind(&ClientSocket::handle_read,shared_from_this(),_1,_2));
-}
-void ClientSocket::handle_read(boost::system::error_code ec,std::size_t byte_transferred)
+
+void ClientSocket::read_handle(boost::system::error_code ec,std::size_t byte_transferred)
 {
     if(!ec)
     {
-        std::cout<<message;
-        this->write2remote(message);
-        memset(message,0,1024);
-        this->startRead();
-
+        tcpserver->onMessage();
     }
     else
     {
         _sock->close();
     }
-
 }
 
-void ClientSocket::write2remote(string msg)
+//void ClientSocket::write2remote(string msg)
+//{
+//    _sock->async_write_some(boost::asio::buffer(msg),boost::bind(&ClientSocket::write_handle,shared_from_this(),_1,_2));
+//}
+
+void ClientSocket::send(String msg)
 {
-    _sock->async_write_some(boost::asio::buffer(msg),boost::bind(&ClientSocket::handle_write,shared_from_this(),_1,_2));
+    _ios.post([this,msg](){
+        _sock->async_write_some(boost::asio::buffer(msg),boost::bind(&ClientSocket::write_handle,shared_from_this(),_1,_2));
+    });
 }
-void ClientSocket::handle_write(boost::system::error_code ec,std::size_t byte_transferred)
+
+void ClientSocket::write_handle(boost::system::error_code ec,std::size_t byte_transferred)
 {
-    std::cout<<byte_transferred<<" bytes sended"<<endl;
+    if(!ec)
+    {
+
+    }
+    else
+    {
+        _tcpserver->onClosed(shared_from_this());
+    }
+
 }

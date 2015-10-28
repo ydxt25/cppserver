@@ -9,20 +9,31 @@ TcpServer::TcpServer(io_service &ios_,int port):_ios(ios_),_acceptor(ios_,boost:
 
 void TcpServer::start()
 {
-    ClientSocket::Ptr sock(new ClientSocket(_ios));
-    _acceptor.async_accept(*sock->GetSocket(),boost::bind(&TcpServer::handle_accept,this,_1,sock));
+    ClientSocket::Ptr sock(new ClientSocket(_ios,this));
+    _acceptor.async_accept(*sock->GetSocket(),boost::bind(&TcpServer::accept_handle,this,_1,sock));
 }
 
-void TcpServer::handle_accept(boost::system::error_code ec,ClientSocket::Ptr sock)
+void TcpServer::accept_handle(boost::system::error_code ec,ClientSocket::Ptr sock)
 {
     if(!ec)
     {
-        cout<<"accept"<<endl;
-        sock->startRead();
+        onConnected(sock);
         start();
     }
     else
     {
         _acceptor.close();
     }
+}
+
+
+void TcpServer::onMessage(ClientSocket::Ptr sock,String msg)
+{
+    onDispatch(sock,msg);
+}
+
+
+void TcpServer::onClosed(ClientSocket::Ptr)
+{
+
 }
